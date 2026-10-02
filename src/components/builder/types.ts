@@ -88,7 +88,9 @@ export function mapTree(root: BNode, fn: (n: BNode) => BNode): BNode {
   return n.children ? { ...n, children: n.children.map((c) => mapTree(c, fn)) } : n;
 }
 export function cloneWithIds(n: BNode): BNode {
-  return { ...n, id: uid(), style: { ...n.style }, children: n.children?.map(cloneWithIds) };
+  const c: BNode = { ...n, id: uid(), style: { ...n.style } };
+  if (n.children) c.children = n.children.map(cloneWithIds);
+  return c;
 }
 
 const kebab = (s: string) => s.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());

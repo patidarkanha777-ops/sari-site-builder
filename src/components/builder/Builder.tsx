@@ -42,8 +42,8 @@ export function Builder() {
     setPage(next);
   }, [page]);
 
-  const undo = () => { if (!past.length) return; setFuture((f) => [page, ...f]); setPage(past[past.length - 1]); setPast((p) => p.slice(0, -1)); };
-  const redo = () => { if (!future.length) return; setPast((p) => [...p, page]); setPage(future[0]); setFuture((f) => f.slice(1)); };
+  const undo = () => { if (!past.length) return; setFuture((f) => [page, ...f]); setPage(past[past.length - 1]!); setPast((p) => p.slice(0, -1)); };
+  const redo = () => { if (!future.length) return; setPast((p) => [...p, page]); setPage(future[0]!); setFuture((f) => f.slice(1)); };
 
   const update = (id: string, patch: Partial<BNode>) => commit(mapTree(page, (n) => (n.id === id ? { ...n, ...patch } : n)));
   const setStyle = (id: string, k: string, v: string) =>
@@ -97,7 +97,7 @@ export function Builder() {
       if (n.id !== parent.id) return n;
       const ch = [...n.children!]; const i = ch.findIndex((c) => c.id === selected); const j = i + dir;
       if (j < 0 || j >= ch.length) return n;
-      [ch[i], ch[j]] = [ch[j], ch[i]];
+      const tmp = ch[i]!; ch[i] = ch[j]!; ch[j] = tmp;
       return { ...n, children: ch };
     }));
   };
