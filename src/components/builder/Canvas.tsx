@@ -113,12 +113,15 @@ function InsertionPoint({ parentRef, parentId, index, count, direction, onInsert
   }, [direction, index, parentId, parentRef]);
 
   useLayoutEffect(() => {
-    measure();
     const observer = new ResizeObserver(measure);
-    if (parentRef.current) observer.observe(parentRef.current);
+    const frame = window.requestAnimationFrame(() => {
+      measure();
+      if (parentRef.current) observer.observe(parentRef.current);
+    });
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     return () => {
+      window.cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
