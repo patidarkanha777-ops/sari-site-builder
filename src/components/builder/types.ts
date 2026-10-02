@@ -87,6 +87,14 @@ export function mapTree(root: BNode, fn: (n: BNode) => BNode): BNode {
   const n = fn(root);
   return n.children ? { ...n, children: n.children.map((c) => mapTree(c, fn)) } : n;
 }
+export function insertChildAt(root: BNode, parentId: string, index: number, child: BNode): BNode {
+  return mapTree(root, (n) => {
+    if (n.id !== parentId) return n;
+    const children = [...(n.children ?? [])];
+    children.splice(Math.max(0, Math.min(index, children.length)), 0, child);
+    return { ...n, children };
+  });
+}
 export function cloneWithIds(n: BNode): BNode {
   const c: BNode = { ...n, id: uid(), style: { ...n.style } };
   if (n.children) c.children = n.children.map(cloneWithIds);
