@@ -6,7 +6,7 @@ import {
 import { RenderNode } from "./Canvas";
 import { Inspector } from "./Inspector";
 import {
-  type BNode, type NodeType, createNode, defaultPage, findNode, findParent, mapTree, cloneWithIds, isContainer, toHTML,
+  type BNode, type NodeType, createNode, defaultPage, findNode, findParent, mapTree, insertChildAt, cloneWithIds, isContainer, toHTML,
 } from "./types";
 
 const KEY = "builder-page-v1";
@@ -78,6 +78,13 @@ export function Builder() {
       next = { ...page, children: [...(page.children ?? []), node] };
     }
     commit(next); setSelected(node.id);
+  };
+
+  const insert = (parentId: string, index: number, type: NodeType) => {
+    const node = createNode(type);
+    commit(insertChildAt(page, parentId, index, node));
+    setSelected(node.id);
+    setTextEditId(null);
   };
 
   const remove = () => {
@@ -193,6 +200,7 @@ export function Builder() {
           <div className="bld-frame" style={{ width: DEVICES[device] }}>
             <RenderNode node={page} selected={selected} editing={editing} textEditId={textEditId}
               onSelect={select} onSelectParent={selectParent} onEditText={setTextEditId}
+              onMove={move} onDuplicate={duplicate} onDelete={remove} onInsert={insert}
               onText={(id, text) => {
                 setTextEditId(null);
                 const n = findNode(page, id); if (n && n.text !== text) update(id, { text });
