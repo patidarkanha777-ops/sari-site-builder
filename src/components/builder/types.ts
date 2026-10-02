@@ -56,7 +56,7 @@ export const defaultPage: BNode = {
         {
           id: "row", type: "container",
           style: { display: "flex", flexDirection: "row", gap: "24px", width: "100%", maxWidth: "1000px", justifyContent: "center", flexWrap: "wrap" },
-          children: ["Styles", "Content", "Layout"].map((t, i) => ({
+          children: ["Styles", "Content", "Layout"].map((t, i): BNode => ({
             id: "c" + i, type: "container" as const,
             style: { display: "flex", flexDirection: "column", gap: "8px", padding: "28px", background: "#ffffff", borderRadius: "16px", flex: "1", minWidth: "220px" },
             children: [
