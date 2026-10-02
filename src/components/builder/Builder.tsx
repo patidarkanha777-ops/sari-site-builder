@@ -26,9 +26,16 @@ export function Builder() {
   const [past, setPast] = useState<BNode[]>([]);
   const [future, setFuture] = useState<BNode[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [textEditId, setTextEditId] = useState<string | null>(null);
   const [editing, setEditing] = useState(true);
   const [device, setDevice] = useState<keyof typeof DEVICES>("desktop");
   const [tab, setTab] = useState<"add" | "layers">("add");
+
+  const select = (id: string | null) => { setSelected(id); setTextEditId(null); };
+  const selectParent = (id: string) => {
+    const parent = findParent(page, id);
+    if (parent && parent.id !== id) select(parent.id);
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem(KEY);
@@ -77,7 +84,7 @@ export function Builder() {
     if (!selected || selected === "root") return;
     const parent = findParent(page, selected)!;
     commit(mapTree(page, (n) => (n.id === parent.id ? { ...n, children: n.children!.filter((c) => c.id !== selected) } : n)));
-    setSelected(null);
+    select(null);
   };
   const duplicate = () => {
     if (!selected || selected === "root") return;
@@ -88,7 +95,7 @@ export function Builder() {
       const ch = [...n.children!]; ch.splice(ch.findIndex((c) => c.id === selected) + 1, 0, copy);
       return { ...n, children: ch };
     }));
-    setSelected(copy.id);
+    select(copy.id);
   };
   const move = (dir: -1 | 1) => {
     if (!selected || selected === "root") return;
@@ -108,7 +115,11 @@ export function Builder() {
       if (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName)) return;
       if ((e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); e.shiftKey ? redo() : undo(); }
       else if (e.key === "Delete" || e.key === "Backspace") remove();
-      else if (e.key === "Escape") setSelected(null);
+      else if (e.key === "Escape") { if (textEditId) setTextEditId(null); else setSelected(null); }
+      else if (e.key === "Enter" && selected && !textEditId) {
+        const n = findNode(page, selected);
+        if (n && (n.type === "heading" || n.type === "text" || n.type === "button")) { e.preventDefault(); setTextEditId(selected); }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -125,7 +136,7 @@ export function Builder() {
 
   const Layer = ({ n, depth }: { n: BNode; depth: number }) => (
     <>
-      <button className={`layer ${selected === n.id ? "layer-active" : ""}`} style={{ paddingLeft: 10 + depth * 14 }} onClick={() => setSelected(n.id)}>
+      <button className={`layer ${selected === n.id ? "layer-active" : ""}`} style={{ paddingLeft: 10 + depth * 14 }} onClick={() => select(n.id)}>
         <span className="layer-type">{n.id === "root" ? "page" : n.type}</span>
         <span className="layer-text">{n.text ?? ""}</span>
       </button>
@@ -148,9 +159,9 @@ export function Builder() {
           })}
         </div>
         <div className="bld-group">
-          <button className="ibtn" title="Reset page" onClick={() => { commit(defaultPage); setSelected(null); }}><RotateCcw size={16} /></button>
+          <button className="ibtn" title="Reset page" onClick={() => { commit(defaultPage); select(null); }}><RotateCcw size={16} /></button>
           <button className="ibtn" title="Download HTML" onClick={exportHtml}><Download size={16} /></button>
-          <button className="pbtn" onClick={() => { setEditing(!editing); setSelected(null); }}>
+          <button className="pbtn" onClick={() => { setEditing(!editing); select(null); }}>
             {editing ? <><Eye size={15} /> Preview</> : <><Pencil size={15} /> Edit</>}
           </button>
         </div>
@@ -178,11 +189,14 @@ export function Builder() {
           </aside>
         )}
 
-        <main className="bld-stage" onClick={() => setSelected(null)}>
+        <main className="bld-stage" onClick={() => select(null)}>
           <div className="bld-frame" style={{ width: DEVICES[device] }}>
-            <RenderNode node={page} selected={selected} editing={editing} onSelect={setSelected} onText={(id, text) => {
-              const n = findNode(page, id); if (n && n.text !== text) update(id, { text });
-            }} />
+            <RenderNode node={page} selected={selected} editing={editing} textEditId={textEditId}
+              onSelect={select} onSelectParent={selectParent} onEditText={setTextEditId}
+              onText={(id, text) => {
+                setTextEditId(null);
+                const n = findNode(page, id); if (n && n.text !== text) update(id, { text });
+              }} />
           </div>
         </main>
 
