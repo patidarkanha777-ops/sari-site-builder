@@ -26,9 +26,16 @@ export function Builder() {
   const [past, setPast] = useState<BNode[]>([]);
   const [future, setFuture] = useState<BNode[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [textEditId, setTextEditId] = useState<string | null>(null);
   const [editing, setEditing] = useState(true);
   const [device, setDevice] = useState<keyof typeof DEVICES>("desktop");
   const [tab, setTab] = useState<"add" | "layers">("add");
+
+  const select = (id: string | null) => { setSelected(id); setTextEditId(null); };
+  const selectParent = (id: string) => {
+    const parent = findParent(page, id);
+    if (parent && parent.id !== id) select(parent.id);
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem(KEY);
@@ -108,7 +115,11 @@ export function Builder() {
       if (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName)) return;
       if ((e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); e.shiftKey ? redo() : undo(); }
       else if (e.key === "Delete" || e.key === "Backspace") remove();
-      else if (e.key === "Escape") setSelected(null);
+      else if (e.key === "Escape") { if (textEditId) setTextEditId(null); else setSelected(null); }
+      else if (e.key === "Enter" && selected && !textEditId) {
+        const n = findNode(page, selected);
+        if (n && (n.type === "heading" || n.type === "text" || n.type === "button")) { e.preventDefault(); setTextEditId(selected); }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
