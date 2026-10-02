@@ -93,7 +93,6 @@ function InsertionPoint({ parentRef, parentId, index, count, direction, onInsert
   onInsert: (parentId: string, index: number, type: NodeType) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const parentRect = useElementRect(parentRef, true);
   const [position, setPosition] = useState<{ top: number; left: number; horizontal: boolean } | null>(null);
 
   const measure = useCallback(() => {
@@ -124,7 +123,7 @@ function InsertionPoint({ parentRef, parentId, index, count, direction, onInsert
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [measure, parentRef, parentRect, count]);
+  }, [measure, parentRef, count]);
 
   useEffect(() => {
     if (!open) return;
@@ -210,7 +209,7 @@ export function RenderNode({ node, selected, editing, textEditId, onSelect, onSe
           {isSel && node.id !== "root" && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}
           <div {...common}>
             {editing && Array.from({ length: (node.children?.length ?? 0) + 1 }, (_, index) => (
-              <InsertionPoint key={`insert-${index}`} parentRef={elementRef} parentId={node.id} index={index} count={node.children?.length ?? 0} direction={node.style.flexDirection ?? "column"} onInsert={onInsert} />
+              <InsertionPoint key={`insert-${index}`} parentRef={elementRef} parentId={node.id} index={index} count={node.children?.length ?? 0} direction={node.style["flexDirection"] ?? "column"} onInsert={onInsert} />
             ))}
             {node.children?.length ? node.children.map((c) => (
               <RenderNode key={c.id} node={c} selected={selected} editing={editing} textEditId={textEditId}
