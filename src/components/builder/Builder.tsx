@@ -136,7 +136,7 @@ export function Builder() {
 
   const Layer = ({ n, depth }: { n: BNode; depth: number }) => (
     <>
-      <button className={`layer ${selected === n.id ? "layer-active" : ""}`} style={{ paddingLeft: 10 + depth * 14 }} onClick={() => setSelected(n.id)}>
+      <button className={`layer ${selected === n.id ? "layer-active" : ""}`} style={{ paddingLeft: 10 + depth * 14 }} onClick={() => select(n.id)}>
         <span className="layer-type">{n.id === "root" ? "page" : n.type}</span>
         <span className="layer-text">{n.text ?? ""}</span>
       </button>
@@ -189,11 +189,14 @@ export function Builder() {
           </aside>
         )}
 
-        <main className="bld-stage" onClick={() => setSelected(null)}>
+        <main className="bld-stage" onClick={() => select(null)}>
           <div className="bld-frame" style={{ width: DEVICES[device] }}>
-            <RenderNode node={page} selected={selected} editing={editing} onSelect={setSelected} onText={(id, text) => {
-              const n = findNode(page, id); if (n && n.text !== text) update(id, { text });
-            }} />
+            <RenderNode node={page} selected={selected} editing={editing} textEditId={textEditId}
+              onSelect={select} onSelectParent={selectParent} onEditText={setTextEditId}
+              onText={(id, text) => {
+                setTextEditId(null);
+                const n = findNode(page, id); if (n && n.text !== text) update(id, { text });
+              }} />
           </div>
         </main>
 
