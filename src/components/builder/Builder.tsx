@@ -84,7 +84,7 @@ export function Builder() {
     if (!selected || selected === "root") return;
     const parent = findParent(page, selected)!;
     commit(mapTree(page, (n) => (n.id === parent.id ? { ...n, children: n.children!.filter((c) => c.id !== selected) } : n)));
-    setSelected(null);
+    select(null);
   };
   const duplicate = () => {
     if (!selected || selected === "root") return;
@@ -95,7 +95,7 @@ export function Builder() {
       const ch = [...n.children!]; ch.splice(ch.findIndex((c) => c.id === selected) + 1, 0, copy);
       return { ...n, children: ch };
     }));
-    setSelected(copy.id);
+    select(copy.id);
   };
   const move = (dir: -1 | 1) => {
     if (!selected || selected === "root") return;
@@ -159,9 +159,9 @@ export function Builder() {
           })}
         </div>
         <div className="bld-group">
-          <button className="ibtn" title="Reset page" onClick={() => { commit(defaultPage); setSelected(null); }}><RotateCcw size={16} /></button>
+          <button className="ibtn" title="Reset page" onClick={() => { commit(defaultPage); select(null); }}><RotateCcw size={16} /></button>
           <button className="ibtn" title="Download HTML" onClick={exportHtml}><Download size={16} /></button>
-          <button className="pbtn" onClick={() => { setEditing(!editing); setSelected(null); }}>
+          <button className="pbtn" onClick={() => { setEditing(!editing); select(null); }}>
             {editing ? <><Eye size={15} /> Preview</> : <><Pencil size={15} /> Edit</>}
           </button>
         </div>
