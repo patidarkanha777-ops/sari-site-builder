@@ -139,7 +139,7 @@ function InsertionPoint({ parentRef, parentId, index, count, direction, onInsert
 
   if (!position) return null;
   return createPortal(
-    <div className={`block-inserter ${position.horizontal ? "block-inserter-row" : "block-inserter-column"}`} style={{ top: position.top, left: position.left }} onClick={(e) => e.stopPropagation()}>
+    <div className={`block-inserter ${position.horizontal ? "block-inserter-row" : "block-inserter-column"} ${open ? "block-inserter-open" : ""}`} style={{ top: position.top, left: position.left }} onClick={(e) => e.stopPropagation()}>
       <span className="block-inserter-line" />
       <button type="button" className="block-inserter-trigger" aria-label="Add block" aria-expanded={open} onClick={() => setOpen((value) => !value)}><Plus size={16} /></button>
       {open && (
