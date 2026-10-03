@@ -3,6 +3,7 @@ export type NodeType = "section" | "container" | "heading" | "text" | "button" |
 export interface BNode {
   id: string;
   type: NodeType;
+  level?: number; // heading tag level 1-6 (h1..h6)
   text?: string;
   src?: string;
   href?: string;
@@ -22,7 +23,7 @@ export function createNode(type: NodeType): BNode {
     case "container":
       return { id, type, style: { display: "flex", flexDirection: "row", gap: "16px", padding: "16px", width: "100%", justifyContent: "center" }, children: [] };
     case "heading":
-      return { id, type, text: "New heading", style: { fontSize: "40px", fontWeight: "700", color: "#1c1917", margin: "0" } };
+      return { id, type, level: 2, text: "New heading", style: { fontSize: "40px", fontWeight: "700", color: "#1c1917", margin: "0" } };
     case "text":
       return { id, type, text: "Write something meaningful here.", style: { fontSize: "18px", color: "#57534e", lineHeight: "1.6", margin: "0" } };
     case "button":
@@ -43,7 +44,7 @@ export const defaultPage: BNode = {
       id: "hero", type: "section",
       style: { padding: "120px 32px", background: "#1c1917", display: "flex", flexDirection: "column", gap: "24px", alignItems: "center", textAlign: "center" },
       children: [
-        { id: "h1", type: "heading", text: "Build your site, visually.", style: { fontSize: "64px", fontWeight: "700", color: "#fafaf9", margin: "0", maxWidth: "800px", lineHeight: "1.05" } },
+        { id: "h1", type: "heading", level: 1, text: "Build your site, visually.", style: { fontSize: "64px", fontWeight: "700", color: "#fafaf9", margin: "0", maxWidth: "800px", lineHeight: "1.05" } },
         { id: "p1", type: "text", text: "Click any element to select it. Double-click text to edit. Use the panel on the right to change styles.", style: { fontSize: "20px", color: "#a8a29e", margin: "0", maxWidth: "600px", lineHeight: "1.6" } },
         { id: "b1", type: "button", text: "Get started", href: "#", style: { background: "#ea580c", color: "#ffffff", padding: "14px 32px", borderRadius: "999px", fontSize: "16px", fontWeight: "600", display: "inline-block", textDecoration: "none" } },
       ],
@@ -52,7 +53,7 @@ export const defaultPage: BNode = {
       id: "feat", type: "section",
       style: { padding: "80px 32px", background: "#f6f1ea", display: "flex", flexDirection: "column", gap: "32px", alignItems: "center" },
       children: [
-        { id: "h2", type: "heading", text: "Everything is editable", style: { fontSize: "40px", fontWeight: "700", color: "#1c1917", margin: "0" } },
+        { id: "h2", type: "heading", level: 2, text: "Everything is editable", style: { fontSize: "40px", fontWeight: "700", color: "#1c1917", margin: "0" } },
         {
           id: "row", type: "container",
           style: { display: "flex", flexDirection: "row", gap: "24px", width: "100%", maxWidth: "1000px", justifyContent: "center", flexWrap: "wrap" },
@@ -60,7 +61,7 @@ export const defaultPage: BNode = {
             id: "c" + i, type: "container" as const,
             style: { display: "flex", flexDirection: "column", gap: "8px", padding: "28px", background: "#ffffff", borderRadius: "16px", flex: "1", minWidth: "220px" },
             children: [
-              { id: "ch" + i, type: "heading" as const, text: t, style: { fontSize: "22px", fontWeight: "700", color: "#1c1917", margin: "0" } },
+              { id: "ch" + i, type: "heading" as const, level: 3, text: t, style: { fontSize: "22px", fontWeight: "700", color: "#1c1917", margin: "0" } },
               { id: "ct" + i, type: "text" as const, text: "Change colors, fonts, spacing and more without writing code.", style: { fontSize: "16px", color: "#57534e", margin: "0", lineHeight: "1.6" } },
             ],
           })),
@@ -106,7 +107,7 @@ const esc = (s = "") => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 export function toHTML(n: BNode): string {
   const css = Object.entries(n.style).map(([k, v]) => `${kebab(k)}:${v}`).join(";");
   switch (n.type) {
-    case "heading": return `<h2 style="${css}">${esc(n.text)}</h2>`;
+    case "heading": { const tag = `h${n.level ?? 2}`; return `<${tag} style="${css}">${esc(n.text)}</${tag}>`; }
     case "text": return `<p style="${css}">${esc(n.text)}</p>`;
     case "button": return `<a href="${n.href}" style="${css}">${esc(n.text)}</a>`;
     case "image": return `<img src="${n.src}" style="${css}" alt=""/>`;

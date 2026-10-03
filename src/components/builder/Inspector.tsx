@@ -44,6 +44,13 @@ export function Inspector({ node, onChange, onStyle }: Props) {
         {(node.type === "heading" || node.type === "text" || node.type === "button") && (
           <Field label="Text"><textarea className="insp-input" rows={3} value={node.text} onChange={(e) => onChange({ text: e.target.value })} /></Field>
         )}
+        {node.type === "heading" && (
+          <Field label="Heading level">
+            <select className="insp-input" value={String(node.level ?? 2)} onChange={(e) => onChange({ level: Number(e.target.value) })}>
+              {[1, 2, 3, 4, 5, 6].map((l) => <option key={l} value={l}>H{l}</option>)}
+            </select>
+          </Field>
+        )}
         {node.type === "button" && (
           <Field label="Link"><input className="insp-input" value={node.href} onChange={(e) => onChange({ href: e.target.value })} /></Field>
         )}
