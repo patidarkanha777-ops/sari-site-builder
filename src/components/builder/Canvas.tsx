@@ -42,12 +42,15 @@ function useElementRect(ref: RefObject<HTMLElement | null>, active: boolean) {
 
   useLayoutEffect(() => {
     if (!active) { setRect(null); return; }
-    measure();
     const observer = new ResizeObserver(measure);
-    if (ref.current) observer.observe(ref.current);
+    const frame = window.requestAnimationFrame(() => {
+      measure();
+      if (ref.current) observer.observe(ref.current);
+    });
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     return () => {
+      window.cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
@@ -139,7 +142,7 @@ function InsertionPoint({ parentRef, parentId, index, count, direction, onInsert
 
   if (!position) return null;
   return createPortal(
-    <div className={`block-inserter ${position.horizontal ? "block-inserter-row" : "block-inserter-column"}`} style={{ top: position.top, left: position.left }} onClick={(e) => e.stopPropagation()}>
+    <div data-insert-parent={parentId} data-insert-index={index} className={`block-inserter ${position.horizontal ? "block-inserter-row" : "block-inserter-column"} ${open ? "block-inserter-open" : ""}`} style={{ top: position.top, left: position.left }} onClick={(e) => e.stopPropagation()}>
       <span className="block-inserter-line" />
       <button type="button" className="block-inserter-trigger" aria-label="Add block" aria-expanded={open} onClick={() => setOpen((value) => !value)}><Plus size={16} /></button>
       {open && (
