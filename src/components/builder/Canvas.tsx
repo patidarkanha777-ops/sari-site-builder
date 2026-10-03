@@ -42,12 +42,15 @@ function useElementRect(ref: RefObject<HTMLElement | null>, active: boolean) {
 
   useLayoutEffect(() => {
     if (!active) { setRect(null); return; }
-    measure();
     const observer = new ResizeObserver(measure);
-    if (ref.current) observer.observe(ref.current);
+    const frame = window.requestAnimationFrame(() => {
+      measure();
+      if (ref.current) observer.observe(ref.current);
+    });
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     return () => {
+      window.cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
