@@ -204,7 +204,7 @@ export function RenderNode({ node, selected, editing, textEditId, onSelect, onSe
   };
 
   switch (node.type) {
-    case "heading": return <>{isSel && node.id !== "root" && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}<h2 {...common} {...textProps}>{node.text}</h2></>;
+    case "heading": { const H = `h${node.level ?? 2}` as "h2"; return <>{isSel && node.id !== "root" && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}<H {...common} {...textProps}>{node.text}</H></>; }
     case "text": return <>{isSel && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}<p {...common} {...textProps}>{node.text}</p></>;
     case "button": return <>{isSel && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}<a href={editing ? undefined : node.href} {...common} {...textProps}>{node.text}</a></>;
     case "image": return <>{isSel && <BlockToolbar targetRef={elementRef} type={node.type} onMove={onMove} onDuplicate={onDuplicate} onDelete={onDelete} />}<img src={node.src} alt="" {...common} /></>;
